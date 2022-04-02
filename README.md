@@ -1,8 +1,8 @@
-# Nest JS To-do
+# Nest JS To-do application
 
 _ April 2022_
 
-> 🔨 From udemy: [Unit testing your Javascript with jasmine - Martynas Vanagas](https://www.udemy.com/course/unit-testing-your-javascript-with-jasmine/).
+> 🔨 From udemy: [Créer une app FullStack TypeScript avec Angular et NestJS](https://www.udemy.com/course/creer-une-app-fullstack-typescript-avec-angular-et-nestjs).
 
 ---
 
@@ -53,6 +53,8 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+[http://localhost:3000/](http://localhost:3000/)
+
 ## Test
 
 ```bash
@@ -66,15 +68,219 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
+## VSCode : Avoid error _Parsing error: Cannot read file '…/tsconfig.json'.eslint_
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Create a .vscode folder in the root project directory and add the following property to the settings.json file inside it:
 
-## Stay in touch
+```ts
+{
+  "eslint.workingDirectories": [
+    "src"
+  ]
+}
+```
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Architecture - core files
+
+### main.ts
+
+Entry point and server creation.
+
+It uses the core function NestFactory to create a Nest application instance.
+
+It includes an async function, which will bootstrap our application.
+
+```ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+### app.module.ts
+
+The root module of the application.
+
+It encapsulates a controller and a service (provider).
+
+```ts
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
+@Module({
+  imports: [],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
+```
+
+### app.controller.ts
+
+A basic controller with a single route.
+
+This one add the decorator @Controller (that is a new feature for the class) and a new method get using the decorator @Get. In the constructor we add a service using dependancy injection.
+
+Note : single-responsibility principle (SRP) => a controller only does one task
+
+```ts
+import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service';
+
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}
+
+  @Get()
+  getHello(): string {
+    return this.appService.getHello();
+  }
+}
+```
+
+### app.service.ts
+
+A basic service with a single method.
+
+We transform the class into a service using @injectable.
+
+The core file add a method returning "Hello World!".
+
+```ts
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class AppService {
+  getHello(): string {
+    return 'Hello World!';
+  }
+}
+```
+
+## Architecture - nest generate
+
+Generates and/or modifies files based on a schematic: [nest generate](https://docs.nestjs.com/cli/usages#nest-generate).
+
+### Module
+
+`nest generate module <mymodule>`
+
+`nest g mo <mymodule>`
+
+=> CREATE src/todo/<mymodule>.module.ts
+
+=> UPDATE src/app.module.ts
+
+Ex:
+
+```ts
+import { Module } from '@nestjs/common';
+
+@Module({})
+export class TodoModule {}
+```
+
+Generate a module declaration.
+
+### Controller
+
+`nest generate controller <mycontroller>`
+
+`nest g co <mycontroller>`
+
+Generate a controller declaration, including its associated module and spec (test file).
+
+=> CREATE src/<mymodule>/<mycomponent>.controller.spec.ts
+
+=> CREATE src/<mymodule>/<mycomponent>.controller.ts
+
+=> UPDATE src/<mymodule>/<mycomponent>.module.ts
+
+Ex _<mycomponent>.controller.ts_:
+
+```ts
+import { Controller } from '@nestjs/common';
+
+@Controller('todo')
+export class TodoController {}
+```
+
+Ex _<mycomponent>.module.ts_:
+
+```ts
+import { Module } from '@nestjs/common';
+import { TodoController } from './todo.controller';
+
+@Module({
+  controllers: [TodoController],
+})
+export class TodoModule {}
+```
+
+### Service
+
+`nest generate service <myservice>`
+
+`nest g s <myservice>`
+
+Generate a service declaration.
+
+=> CREATE src/<mymodule>/<myservice>.service.spec.ts
+
+=> CREATE src/<mymodule>/<myservice>.service.ts
+
+=> UPDATE src/<mymodule>/<myservice>.module.ts
+
+Ex:
+
+```ts
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class TodoService {}
+```
+
+### Interface
+
+`nest generate interface <myinterface>`
+
+Generate an interface.
+
+Interface is a structure that defines the contract in your application. It defines the syntax for classes to follow. Classes that are derived from an interface must follow the structure provided by their interface.
+
+The TypeScript compiler does not convert interface to JavaScript. It uses interface for type checking. This is also known as "duck typing" or "structural subtyping".
+
+Ex:
+
+```ts
+export interface Todo {
+  id: number;
+  title: string;
+  done: boolean;
+  description?: string;
+}
+```
+
+### Crud test
+
+### Get
+
+```bash
+curl http://localhost:3000/todo
+
+curl http://localhost:3000/todo/2
+```
+
+### Post
+
+```bash
+curl -d '{"id":4, "title":"test-title", "description":"test-description", "done":false}' -H "Content-Type: application/json" -X POST http://localhost:3000/todo
+```
 
 ## License
 
