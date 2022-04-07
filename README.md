@@ -80,6 +80,15 @@ Create a .vscode folder in the root project directory and add the following prop
 }
 ```
 
+In _.eslintrc.js_:
+
+```js
+  parserOptions: {
+    project: 'PROJECT_NAME/tsconfig.json',
+    sourceType: 'module',
+  },
+```
+
 ## Architecture - core files
 
 ### main.ts
@@ -162,7 +171,7 @@ export class AppService {
 }
 ```
 
-## Architecture - nest generate
+## Architecture (with nest generate)
 
 Generates and/or modifies files based on a schematic: [nest generate](https://docs.nestjs.com/cli/usages#nest-generate).
 
@@ -253,6 +262,8 @@ Generate an interface.
 
 Interface is a structure that defines the contract in your application. It defines the syntax for classes to follow. Classes that are derived from an interface must follow the structure provided by their interface.
 
+TypeScript interfaces are used for type-checking and defining the types of data that can be passed to a controller or a Nest service.
+
 The TypeScript compiler does not convert interface to JavaScript. It uses interface for type checking. This is also known as "duck typing" or "structural subtyping".
 
 Ex:
@@ -266,7 +277,22 @@ export interface Todo {
 }
 ```
 
-### Crud test
+### Data Transfer Object (DTO)
+
+DTO is the short name of Data Transfer Object. DTO is used in order to validate incoming requests.
+
+We could determine the DTO schema by using TypeScript interfaces, or by simple classes. Interestingly, we recommend using classes here. Why? Classes are part of the JavaScript ES6 standard, and therefore they are preserved as real entities in the compiled JavaScript. On the other hand, since TypeScript interfaces are removed during the transpilation, Nest can't refer to them at runtime. This is important because features such as Pipes enable additional possibilities when they have access to the metatype of the variable at runtime.
+
+```ts
+export class CreateTodoDto {
+  readonly id: number;
+  readonly title: string;
+  readonly done: boolean;
+  readonly description?: string;
+}
+```
+
+## Crud test
 
 ### Get
 
@@ -279,7 +305,13 @@ curl http://localhost:3000/todo/2
 ### Post
 
 ```bash
-curl -d '{"id":4, "title":"test-title", "description":"test-description", "done":false}' -H "Content-Type: application/json" -X POST http://localhost:3000/todo
+curl -X POST http://localhost:3000/todo -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"id":4, "title":"test-title", "description":"test-description", "done":false}'
+```
+
+### Patch
+
+```bash
+curl -X PATCH http://localhost:3000/todo/2 -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"title": "new_value", "description":"new_value", "done":true}'
 ```
 
 ## License
