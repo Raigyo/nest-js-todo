@@ -13,27 +13,6 @@ _ April 2022_
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
 ## Installation
 
 ```bash
@@ -53,43 +32,97 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Test this application
+
+`npm run start`
+
 [http://localhost:3000/](http://localhost:3000/)
 
-## Test
+### CRUD
+
+[http://localhost:3000/todo](http://localhost:3000/todo)
+
+**Module:** _src/todo_
+
+- _todo.controller.ts_
+- _todo.module.ts_
+- _todo.service.ts_
+- _src/todo/dto/create-todo.dto.ts_
+- _src/todo/interfaces/todo.interface.ts_
+
+#### Get
 
 ```bash
-# unit tests
-$ npm run test
+curl http://localhost:3000/todo
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl http://localhost:3000/todo/2
 ```
 
-## VSCode : Avoid error _Parsing error: Cannot read file '…/tsconfig.json'.eslint_
+Or:
 
-Create a .vscode folder in the root project directory and add the following property to the settings.json file inside it:
+[http://localhost:3000/todo](http://localhost:3000/todo)
 
-```ts
-{
-  "eslint.workingDirectories": [
-    "src"
-  ]
-}
+#### Post
+
+```bash
+curl -X POST http://localhost:3000/todo -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"id":4, "title":"test-title", "description":"test-description", "done":false}'
 ```
 
-In _.eslintrc.js_:
+#### Patch
 
-```js
-  parserOptions: {
-    project: 'PROJECT_NAME/tsconfig.json',
-    sourceType: 'module',
-  },
+```bash
+curl -X PATCH http://localhost:3000/todo/2 -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"title": "new_value", "description":"new_value", "done":true}'
 ```
 
-## Architecture - core files
+#### Delete
+
+```batch
+curl -X DELETE http://localhost:3000/todo/2
+```
+
+### Pipes
+
+**Module:** _src/pipes_
+
+### Get (to uppercase)
+
+_src/common/upper.pipe.ts_
+
+[http://localhost:3000/pipes/vincent](http://localhost:3000/pipes/vincent)
+
+Output: Hello VINCENT
+
+### Post (to uppercase using object)
+
+_src/common/upper-object.pipe.ts_
+
+```bash
+curl -X POST http://localhost:3000/pipes -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"author":"Vincent", "content":"Hello world"}'
+```
+
+Output: {"author":"VINCENT","content":"HELLO WORLD"}
+
+### Get:article (casting type string to number)
+
+_src/common/parse-int.pipe.ts_
+
+[http://localhost:3000/pipes/articles/1](http://localhost:3000/pipes/articles/1)
+
+Output value without pipe: {"id":"1","idType":"string"}
+
+Output value with pipe: {"id":1,"idType":"number"}
+
+### Slug
+
+_src/common/slug.pipe.ts_
+
+```bash
+curl -X POST http://localhost:3000/pipes/articles -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"title":"Javascript ou Frameworks? éèëê", "content": "Lorem ipsum", "Author": "Vincent"}'
+```
+
+Output: {"title":"Javascript ou Frameworks? éèëê","content":"Lorem ipsum","Author":"Vincent","slug":"javascript-ou-frameworks?-eeee"}
+
+## NESTJS: Architecture - core files
 
 ### main.ts
 
@@ -171,7 +204,21 @@ export class AppService {
 }
 ```
 
-## Architecture (with nest generate)
+## NEST JS: Concepts
+
+### Decorators
+
+A decorator is an expression that returns a function. It can take a target, name and property descriptor as arguments. We apply a decorator with an @ character and place it at the top of what we are trying to decorate.
+
+We can define decorators for class, method or a property.
+
+NestJS provides a set of param decorators. We can use them with HTTP route handlers. Some of the common decorators are @Request() or @Req(), @Response() or @Res(), @Body(), @Query() and so on.
+
+### Interceptors
+
+### Guards
+
+## Nest generate
 
 Generates and/or modifies files based on a schematic: [nest generate](https://docs.nestjs.com/cli/usages#nest-generate).
 
@@ -292,27 +339,64 @@ export class CreateTodoDto {
 }
 ```
 
-## Crud test
+### Pipes ~
 
-### Get
+Pipes have two typical use cases:
 
-```bash
-curl http://localhost:3000/todo
+- transformation: transform input data to the desired form (e.g., from string to integer)
+- validation: evaluate input data and if valid, simply pass it through unchanged; otherwise, throw an exception when the data is incorrect
 
-curl http://localhost:3000/todo/2
+`nest g pi <mypipe>`
+
+ex:
+
+=> nest g pi common/upper
+
+CREATE src/common/upper.pipe.spec.ts
+
+CREATE src/common/upper.pipe.ts
+
+```ts
+import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
+
+@Injectable()
+export class UpperPipe implements PipeTransform {
+  transform(value: any, metadata: ArgumentMetadata) {
+    return value;
+  }
+}
 ```
 
-### Post
+## VSCode : Avoid error _Parsing error: Cannot read file '…/tsconfig.json'.eslint_
 
-```bash
-curl -X POST http://localhost:3000/todo -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"id":4, "title":"test-title", "description":"test-description", "done":false}'
+Create a .vscode folder in the root project directory and add the following property to the settings.json file inside it:
+
+```ts
+{
+  "eslint.workingDirectories": [
+    "src"
+  ]
+}
 ```
 
-### Patch
+In _.eslintrc.js_:
 
-```bash
-curl -X PATCH http://localhost:3000/todo/2 -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"title": "new_value", "description":"new_value", "done":true}'
+```js
+  parserOptions: {
+    project: 'PROJECT_NAME/tsconfig.json',
+    sourceType: 'module',
+  },
 ```
+
+## Useful links
+
+- [NestJS: Pipes](https://docs.nestjs.com/pipes)
+- [NestJS: CLI command reference](https://docs.nestjs.com/cli/usages)
+- [Run Curl Commands Online](https://reqbin.com/curl)
+- [Implementing a Generic Repository Pattern Using NestJS](https://betterprogramming.pub/implementing-a-generic-repository-pattern-using-nestjs-fb4db1b61cce)
+- [Clean Node.js Architecture —With NestJs and TypeScript](https://betterprogramming.pub/clean-node-js-architecture-with-nestjs-and-typescript-34b9398d790f)
+- [getting started with Nest (NestJS) framework](https://tkssharma.com/getting-started-with-nest-js-framework-for-nodejs-apis/)
+- [NestJS : l'architecture Angular au service de vos applications NodeJS](https://blog.ippon.fr/2019/07/15/nestjs-larchitecture-angular-au-service-des-applications-nodejs/)
 
 ## License
 
