@@ -32,6 +32,7 @@ export class TodoService {
   }
   create(todo: CreateTodoDto) {
     this.todo = [...this.todo, todo];
+    return { addedTodo: 1, todo: todo };
   }
   update(id: string, todo: CreateTodoDto) {
     // +id => number(id)

@@ -42,7 +42,7 @@ $ npm run start:prod
 
 [http://localhost:3000/todo](http://localhost:3000/todo)
 
-**Module:** _src/todo_
+**Module:** _src/01-todo_
 
 - _todo.controller.ts_
 - _todo.module.ts_
@@ -82,11 +82,15 @@ curl -X DELETE http://localhost:3000/todo/2
 
 ### Pipes
 
-**Module:** _src/pipes_
+**Module:** _src/02-pipes_
 
 ### Get (to uppercase)
 
 _src/common/upper.pipe.ts_
+
+```bash
+http://localhost:3000/pipes/vincent
+```
 
 [http://localhost:3000/pipes/vincent](http://localhost:3000/pipes/vincent)
 
@@ -105,6 +109,10 @@ Output: {"author":"VINCENT","content":"HELLO WORLD"}
 ### Get:article (casting type string to number)
 
 _src/common/parse-int.pipe.ts_
+
+```bash
+curl http://localhost:3000/pipes/articles/1
+```
 
 [http://localhost:3000/pipes/articles/1](http://localhost:3000/pipes/articles/1)
 

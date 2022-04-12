@@ -28,7 +28,7 @@ export class TodoController {
   @Post()
   //@Body: req.body / req.body[param]
   createTodo(@Body() newTodo: CreateTodoDto) {
-    this.todoService.create(newTodo);
+    return this.todoService.create(newTodo);
   }
   @Patch(':id')
   updateTodo(@Param('id') id: string, @Body() todo: CreateTodoDto) {
