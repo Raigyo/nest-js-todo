@@ -1,8 +1,8 @@
-# Nest JS To-do application
+# Nest JS - overview: CRUD, Pipes, Interceptors and Guards
 
 _ April 2022_
 
-> 🔨 From udemy: [Créer une app FullStack TypeScript avec Angular et NestJS](https://www.udemy.com/course/creer-une-app-fullstack-typescript-avec-angular-et-nestjs).
+> 🔨 Nest JS - overview: CRUD, Pipes, Interceptors and Guards. From udemy: [Créer une app FullStack TypeScript avec Angular et NestJS](https://www.udemy.com/course/creer-une-app-fullstack-typescript-avec-angular-et-nestjs).
 
 ---
 
