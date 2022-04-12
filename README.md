@@ -13,123 +13,6 @@ _ April 2022_
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
-## Installation
-
-```bash
-$ npm install
-```
-
-## Running the app
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test this application
-
-`npm run start`
-
-[http://localhost:3000/](http://localhost:3000/)
-
-### CRUD
-
-[http://localhost:3000/todo](http://localhost:3000/todo)
-
-**Module:** _src/01-todo_
-
-- _todo.controller.ts_
-- _todo.module.ts_
-- _todo.service.ts_
-- _src/todo/dto/create-todo.dto.ts_
-- _src/todo/interfaces/todo.interface.ts_
-
-#### Get
-
-```bash
-curl http://localhost:3000/todo
-
-curl http://localhost:3000/todo/2
-```
-
-Or:
-
-[http://localhost:3000/todo](http://localhost:3000/todo)
-
-#### Post
-
-```bash
-curl -X POST http://localhost:3000/todo -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"id":4, "title":"test-title", "description":"test-description", "done":false}'
-```
-
-#### Patch
-
-```bash
-curl -X PATCH http://localhost:3000/todo/2 -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"title": "new_value", "description":"new_value", "done":true}'
-```
-
-#### Delete
-
-```batch
-curl -X DELETE http://localhost:3000/todo/2
-```
-
-### Pipes
-
-**Module:** _src/02-pipes_
-
-### Get (to uppercase)
-
-_src/common/upper.pipe.ts_
-
-```bash
-http://localhost:3000/pipes/vincent
-```
-
-[http://localhost:3000/pipes/vincent](http://localhost:3000/pipes/vincent)
-
-Output: Hello VINCENT
-
-### Post (to uppercase using object)
-
-_src/common/upper-object.pipe.ts_
-
-```bash
-curl -X POST http://localhost:3000/pipes -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"author":"Vincent", "content":"Hello world"}'
-```
-
-Output: {"author":"VINCENT","content":"HELLO WORLD"}
-
-### Get:article (casting type string to number)
-
-_src/common/parse-int.pipe.ts_
-
-```bash
-curl http://localhost:3000/pipes/articles/1
-```
-
-[http://localhost:3000/pipes/articles/1](http://localhost:3000/pipes/articles/1)
-
-Output value without pipe: {"id":"1","idType":"string"}
-
-Output value with pipe: {"id":1,"idType":"number"}
-
-### Slug
-
-_src/common/slug.pipe.ts_
-
-```bash
-curl -X POST http://localhost:3000/pipes/articles -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"title":"Javascript ou Frameworks? éèëê", "content": "Lorem ipsum", "Author": "Vincent"}'
-```
-
-Output: {"title":"Javascript ou Frameworks? éèëê","content":"Lorem ipsum","Author":"Vincent","slug":"javascript-ou-frameworks?-eeee"}
-
 ## NESTJS: Architecture - core files
 
 ### main.ts
@@ -222,11 +105,7 @@ We can define decorators for class, method or a property.
 
 NestJS provides a set of param decorators. We can use them with HTTP route handlers. Some of the common decorators are @Request() or @Req(), @Response() or @Res(), @Body(), @Query() and so on.
 
-### Interceptors
-
-### Guards
-
-## Nest generate
+### Nest generate (scaffolding)
 
 Generates and/or modifies files based on a schematic: [nest generate](https://docs.nestjs.com/cli/usages#nest-generate).
 
@@ -349,10 +228,16 @@ export class CreateTodoDto {
 
 ### Pipes ~
 
+A pipe is a class annotated with the @Injectable() decorator, which implements the PipeTransform interface.
+
 Pipes have two typical use cases:
 
 - transformation: transform input data to the desired form (e.g., from string to integer)
 - validation: evaluate input data and if valid, simply pass it through unchanged; otherwise, throw an exception when the data is incorrect
+
+Pipes are only used for validation or object transformation and as such immediately return successes (with the possibly transformed object) or throw errors about why the transformation/validation failed.
+
+They can only be used during Request process.
 
 `nest g pi <mypipe>`
 
@@ -374,6 +259,203 @@ export class UpperPipe implements PipeTransform {
   }
 }
 ```
+
+### Interceptors
+
+An interceptor is a class annotated with the @Injectable() decorator, which implements the NestInterceptor interface.
+
+There are several uses as below:
+
+- Bind extra logic before or after a method’s execution
+- Transform the result from a method.
+- Transform any exceptions thrown from a function.
+- Extend a method’s behaviour with extra logic.
+- Override a function based on some condition.
+
+`nest generate interceptor common/<myinterceptor>`
+
+`nest g int common/<myinterceptor>`
+
+=> CREATE src/common/<myinterceptor>.spec.ts
+
+=> CREATE src/common/<myinterceptor>.interceptor.ts
+
+```ts
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class MesureDurationInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle();
+  }
+}
+```
+
+The difference with the pipe is that the can be positioned both at the level of the request (intercepting request using context) and the response (using the callback method nexthandle() that leave the request continue untill the controller then use a pipe an operator from rxjs, for instance tap to logging the value from the response).
+
+Reminder: an observable is a stream that continuously sends data that can be intercepted at any time.
+
+```ts
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+} from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+
+@Injectable()
+export class MesureDurationInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    // during request
+    console.log('intercepting request', context);
+    return (
+      next
+        // during response
+        .handle()
+        .pipe(
+          tap((valueFromRouteHandler) =>
+            console.log('after controller sending response'),
+          ),
+        )
+    );
+  }
+}
+```
+
+## Test this application
+
+### Installation
+
+```bash
+npm install
+```
+
+### Running the app
+
+```bash
+# development
+npm run start
+
+# watch mode
+npm run start:dev
+
+# production mode
+npm run start:prod
+```
+
+[http://localhost:3000/](http://localhost:3000/)
+
+### 01 CRUD: todo
+
+[http://localhost:3000/todo](http://localhost:3000/todo)
+
+**Module:** _src/01-todo_
+
+- _todo.controller.ts_
+- _todo.module.ts_
+- _todo.service.ts_
+- _src/todo/dto/create-todo.dto.ts_
+- _src/todo/interfaces/todo.interface.ts_
+
+#### Get
+
+```bash
+curl http://localhost:3000/todo
+
+curl http://localhost:3000/todo/2
+```
+
+Or:
+
+[http://localhost:3000/todo](http://localhost:3000/todo)
+
+#### Post
+
+```bash
+curl -X POST http://localhost:3000/todo -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"id":4, "title":"test-title", "description":"test-description", "done":false}'
+```
+
+#### Patch
+
+```bash
+curl -X PATCH http://localhost:3000/todo/2 -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"title": "new_value", "description":"new_value", "done":true}'
+```
+
+#### Delete
+
+```batch
+curl -X DELETE http://localhost:3000/todo/2
+```
+
+### 02: Pipes
+
+**Module:** _src/02-pipes_
+
+#### Get (to uppercase)
+
+_src/common/pipes/upper.pipe.ts_
+
+```bash
+curl http://localhost:3000/pipes/vincent
+```
+
+[http://localhost:3000/pipes/vincent](http://localhost:3000/pipes/vincent)
+
+Output: Hello VINCENT
+
+#### Post (to uppercase using object)
+
+_src/common/pipes/upper-object.pipe.ts_
+
+```bash
+curl -X POST http://localhost:3000/pipes -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"author":"Vincent", "content":"Hello world"}'
+```
+
+Output: {"author":"VINCENT","content":"HELLO WORLD"}
+
+#### Get:article (casting type string to number)
+
+_src/common/pipes/parse-int.pipe.ts_
+
+```bash
+curl http://localhost:3000/pipes/articles/1
+```
+
+[http://localhost:3000/pipes/articles/1](http://localhost:3000/pipes/articles/1)
+
+Output value without pipe: {"id":"1","idType":"string"}
+
+Output value with pipe: {"id":1,"idType":"number"}
+
+#### Slug
+
+_src/common/pipes/slug.pipe.ts_
+
+```bash
+curl -X POST http://localhost:3000/pipes/articles -H 'Content-Type: application/json' -H 'Accept: application/json' -d '{"title":"Javascript ou Frameworks? éèëê", "content": "Lorem ipsum", "Author": "Vincent"}'
+```
+
+Output: {"title":"Javascript ou Frameworks? éèëê","content":"Lorem ipsum","Author":"Vincent","slug":"javascript-ou-frameworks?-eeee"}
+
+### 03: Interceptors
+
+**Module:** _src/03-interceptors_
+
+#### Request duration
+
+_src/common/interceptors/mesure-duration.interceptor.ts_
+
+Open [http://localhost:3000/interceptors](http://localhost:3000/interceptors)
+
+Output: Duration in ms xx
 
 ## VSCode : Avoid error _Parsing error: Cannot read file '…/tsconfig.json'.eslint_
 

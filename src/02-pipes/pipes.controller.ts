@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Post, UsePipes } from '@nestjs/common';
-import { UpperPipe } from '../common/upper.pipe';
-import { UpperObjectPipe } from '../common/upper-object.pipe';
-import { ParseIntPipe } from '../common/parse-int.pipe';
-import { SlugPipe } from '../common/slug.pipe';
+import { UpperPipe } from '../common/pipes/upper.pipe';
+import { UpperObjectPipe } from '../common/pipes/upper-object.pipe';
+import { ParseIntPipe } from '../common/pipes/parse-int.pipe';
+import { SlugPipe } from '../common/pipes/slug.pipe';
 import { PipesService } from './pipes.service';
 
 @Controller('pipes')
