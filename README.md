@@ -457,6 +457,98 @@ Open [http://localhost:3000/interceptors](http://localhost:3000/interceptors)
 
 Output: Duration in ms xx
 
+#### Request log clients
+
+_src/common/interceptors/log-clients.interceptor.ts_
+
+Open [http://localhost:3000/interceptors](http://localhost:3000/interceptors)
+
+Output (exemple):
+
+```batch
+Client:  {
+  date: '2022-04-14T14:05:35.968Z',
+  urlRequest: 'GET /interceptors',
+  ipAdress: undefined,
+  navigator: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36'
+}
+```
+
+#### Enrich http response
+
+_src/common/interceptors/enrich-response.interceptor.ts_
+
+Open [http://localhost:3000/interceptors](http://localhost:3000/interceptors)
+
+Output:
+
+```json
+{
+  "initialContent": "Hello Interceptor module!",
+  "editedContent": "HELLO INTERCEPTOR MODULE!",
+  "length": 25
+}
+```
+
+#### Enrich http response - part 2
+
+_src/common/interceptors/enrich-response-part2.interceptor.ts_
+
+Open [http://localhost:3000/interceptors/hello/vincent](http://localhost:3000/interceptors/hello/vincent)
+
+Output:
+
+```json
+{
+  "initialContent": "Hello vincent",
+  "editedContent": "HELLO VINCENT",
+  "length": 13,
+  "result": {
+    "headers": {
+      "host": "localhost:3000",
+      "connection": "keep-alive",
+      "sec-ch-ua": "\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"100\", \"Google Chrome\";v=\"100\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"Windows\"",
+      "dnt": "1",
+      "upgrade-insecure-requests": "1",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.88 Safari/537.36",
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+      "sec-fetch-site": "none",
+      "sec-fetch-mode": "navigate",
+      "sec-fetch-user": "?1",
+      "sec-fetch-dest": "document",
+      "accept-encoding": "gzip, deflate, br",
+      "accept-language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7",
+      "cookie": "hubspotutk=845085f9f2df0a9a7c6275d4d2629c01; _hjSessionUser_2008156=eyJpZCI6Ijg1YjZiMWE2LTU0OTItNTQ3My1iM2M2LWI0ZTM3MmE4ZjZiMSIsImNyZWF0ZWQiOjE2NDM4MDY5MjA0NTAsImV4aXN0aW5nIjp0cnVlfQ==; __hstc=181257784.845085f9f2df0a9a7c6275d4d2629c01.1643826158326.1643826158326.1643870679749.2; pma_lang=fr",
+      "if-none-match": "W/\"5c3-kDBaIjw0lhA4PKh5e6cUBW36OLc\""
+    },
+    "dateLogged": "2022-04-19T09:15:04.594Z",
+    "timeZoneOffset": "-2 hours"
+  }
+}
+```
+
+#### Filter and replace
+
+_src/common/interceptors/filter-request.interceptor.ts_
+
+Open [http://localhost:3000/interceptors/filter/vincent](http://localhost:3000/interceptors/filter/vincent)
+
+Output:
+
+```html
+Hello vincent
+```
+
+Open [http://localhost:3000/interceptors/filter/frack](http://localhost:3000/interceptors/filter/frack)
+
+Output:
+
+```html
+Word forbidden!
+```
+
 ## VSCode : Avoid error _Parsing error: Cannot read file '…/tsconfig.json'.eslint_
 
 Create a .vscode folder in the root project directory and add the following property to the settings.json file inside it:

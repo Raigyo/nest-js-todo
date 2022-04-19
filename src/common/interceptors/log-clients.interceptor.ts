@@ -4,7 +4,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 @Injectable()
 export class LogClientsInterceptor implements NestInterceptor {
@@ -15,6 +15,11 @@ export class LogClientsInterceptor implements NestInterceptor {
       ipAdress: '',
       navigator: '',
     };
-    return next.handle();
+    const request = context.switchToHttp().getRequest();
+    client.ipAdress =
+      request.headers['x-forwarde-for'] || request.connection.remoteAdress;
+    client.navigator = request.headers['user-agent'];
+    client.urlRequest = `${request.method} ${request.url}`;
+    return next.handle().pipe(tap(() => console.log('Client: ', client)));
   }
 }
