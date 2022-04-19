@@ -97,6 +97,10 @@ export class AppService {
 
 ## NEST JS: Concepts
 
+### Nest generate (scaffolding)
+
+Generates and/or modifies files based on a schematic: [nest generate](https://docs.nestjs.com/cli/usages#nest-generate).
+
 ### Decorators
 
 A decorator is an expression that returns a function. It can take a target, name and property descriptor as arguments. We apply a decorator with an @ character and place it at the top of what we are trying to decorate.
@@ -105,11 +109,19 @@ We can define decorators for class, method or a property.
 
 NestJS provides a set of param decorators. We can use them with HTTP route handlers. Some of the common decorators are @Request() or @Req(), @Response() or @Res(), @Body(), @Query() and so on.
 
-### Nest generate (scaffolding)
+Additionally, you can create your own custom decorators.
 
-Generates and/or modifies files based on a schematic: [nest generate](https://docs.nestjs.com/cli/usages#nest-generate).
+`nest generate decorator <mydecorator>`
 
-### Module
+`nest g d <mydecorator>`
+
+=> CREATE src/<mydecorator>.decorator.ts
+
+### Modules
+
+A module is a class annotated with a @Module() decorator. The @Module() decorator provides metadata that Nest makes use of to organize the application structure.
+
+![capture](_img-readme/modules.png)
 
 `nest generate module <mymodule>`
 
@@ -130,7 +142,11 @@ export class TodoModule {}
 
 Generate a module declaration.
 
-### Controller
+### Controllers
+
+Controllers are responsible for handling incoming requests and returning responses to the client.
+
+![capture](_img-readme/controllers.png)
 
 `nest generate controller <mycontroller>`
 
@@ -165,7 +181,11 @@ import { TodoController } from './todo.controller';
 export class TodoModule {}
 ```
 
-### Service
+### Providers / Services
+
+Providers are a fundamental concept in Nest. Many of the basic Nest classes may be treated as a provider – services, repositories, factories, helpers, and so on. The main idea of a provider is that it can be injected as a dependency; this means objects can create various relationships with each other, and the function of "wiring up" instances of objects can largely be delegated to the Nest runtime system.
+
+![capture](_img-readme/providers.png)
 
 `nest generate service <myservice>`
 
@@ -188,17 +208,17 @@ import { Injectable } from '@nestjs/common';
 export class TodoService {}
 ```
 
-### Interface
-
-`nest generate interface <myinterface>`
-
-Generate an interface.
+### Interfaces
 
 Interface is a structure that defines the contract in your application. It defines the syntax for classes to follow. Classes that are derived from an interface must follow the structure provided by their interface.
 
 TypeScript interfaces are used for type-checking and defining the types of data that can be passed to a controller or a Nest service.
 
 The TypeScript compiler does not convert interface to JavaScript. It uses interface for type checking. This is also known as "duck typing" or "structural subtyping".
+
+`nest generate interface <myinterface>`
+
+Generate an interface.
 
 Ex:
 
@@ -228,6 +248,8 @@ export class CreateTodoDto {
 
 ### Pipes ~
 
+![capture](_img-readme/pipes.png)
+
 A pipe is a class annotated with the @Injectable() decorator, which implements the PipeTransform interface.
 
 Pipes have two typical use cases:
@@ -245,15 +267,15 @@ ex:
 
 => nest g pi common/upper
 
-CREATE src/common/upper.pipe.spec.ts
+CREATE src/common/<mypipe>.pipe.spec.ts
 
-CREATE src/common/upper.pipe.ts
+CREATE src/common/<mypipe>.pipe.ts
 
 ```ts
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 
 @Injectable()
-export class UpperPipe implements PipeTransform {
+export class ExemplePipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
     return value;
   }
@@ -261,6 +283,8 @@ export class UpperPipe implements PipeTransform {
 ```
 
 ### Interceptors
+
+![capture](_img-readme/interceptors.png)
 
 An interceptor is a class annotated with the @Injectable() decorator, which implements the NestInterceptor interface.
 
@@ -290,7 +314,7 @@ import {
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class MesureDurationInterceptor implements NestInterceptor {
+export class ExempleInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle();
   }
@@ -312,7 +336,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 @Injectable()
-export class MesureDurationInterceptor implements NestInterceptor {
+export class ExempleInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     // during request
     console.log('intercepting request', context);
@@ -326,6 +350,38 @@ export class MesureDurationInterceptor implements NestInterceptor {
           ),
         )
     );
+  }
+}
+```
+
+### Guards
+
+![capture](_img-readme/guards.png)
+
+A guard is a class annotated with the @Injectable() decorator, which implements the CanActivate interface.
+
+Guards have a single responsibility. They determine whether a given request will be handled by the route handler or not, depending on certain conditions (like permissions, roles, ACLs, etc.) present at run-time.
+
+Guards are executed after each middleware, but before any interceptor or pipe.
+
+`nest generate guard common/<myguard>`
+
+`nest g gu common/<myguard>`
+
+=> CREATE src/common/<myguard>.guard.spec.ts
+
+=> CREATE src/common/<myguard>.guard.ts
+
+```ts
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class ExempleGuard implements CanActivate {
+  canActivate(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
+    return true;
   }
 }
 ```
@@ -549,6 +605,48 @@ Output:
 Word forbidden!
 ```
 
+### 04 Guards
+
+**Module:** _src/04-guards_
+
+#### Post (vehicle)
+
+_src/common/guards/ecolo.guard.ts_
+
+```bash
+curl -X POST http://localhost:3000/guards/destination -H "Content-Type: application/x-www-form-urlencoded" -d "vehicle=bike"
+```
+
+Output: {"statusCode":403,"message":"Forbidden resource","error":"Forbidden"}
+
+```bash
+curl -X POST http://localhost:3000/guards/destination -H "Content-Type: application/x-www-form-urlencoded" -d "vehicle=plane"
+```
+
+Output: {"statusCode":403,"message":"Forbidden resource","error":"Forbidden"}
+
+Nest provides the ability to attach custom metadata to route handlers through the **@SetMetadata()** decorator. This metadata supplies our missing role data, which a smart guard needs to make decisions.
+
+To access the route's role(s) (custom metadata), we'll use the **Reflector** helper class.
+
+To read the handler metadata, use the get() method.
+
+```ts
+const greenVehicles = this.reflector.get<string[]>(
+  'greenVehicles',
+  context.getHandler(),
+);
+```
+
+Here we use a **custom decorator**, _src/common/decorators/green-vehicles.decorator.ts_, in which we import **SetMetadata**.
+
+```ts
+import { SetMetadata } from '@nestjs/common';
+
+export const GreenVehicles = (...args: string[]) =>
+  SetMetadata('greenVehicles', args);
+```
+
 ## VSCode : Avoid error _Parsing error: Cannot read file '…/tsconfig.json'.eslint_
 
 Create a .vscode folder in the root project directory and add the following property to the settings.json file inside it:
@@ -579,6 +677,8 @@ In _.eslintrc.js_:
 - [Clean Node.js Architecture —With NestJs and TypeScript](https://betterprogramming.pub/clean-node-js-architecture-with-nestjs-and-typescript-34b9398d790f)
 - [getting started with Nest (NestJS) framework](https://tkssharma.com/getting-started-with-nest-js-framework-for-nodejs-apis/)
 - [NestJS : l'architecture Angular au service de vos applications NodeJS](https://blog.ippon.fr/2019/07/15/nestjs-larchitecture-angular-au-service-des-applications-nodejs/)
+- [NestJS : Interceptors](https://docs.nestjs.com/interceptors)
+- [NestJS : Guards](https://docs.nestjs.com/guards)
 
 ## License
 
