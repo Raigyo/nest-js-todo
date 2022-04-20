@@ -1,4 +1,4 @@
-# Nest JS - overview: CRUD, Pipes, Interceptors and Guards
+# NestJS - A progressive Node.js framework overview: Decorators, Pipes, Interceptors and Guards
 
 _ April 2022_
 
