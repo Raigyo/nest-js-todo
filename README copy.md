@@ -13,10 +13,6 @@ _ April 2022_
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
-[toc]
-
-
-
 ## NESTJS: Architecture - core files
 
 ### main.ts
@@ -619,14 +615,15 @@ _src/common/guards/ecolo.guard.ts_
 
 _src/common/decorators/green-vehicles.decorator.ts_
 
-````bash
-curl -X POST http://localhost:3000/guards/destination -H "Content-Type: application/x-www-form-urlencoded" -d- [Nest JS - overview: CRUD, Pipes, Interceptors and Guards]
+```bash
+curl -X POST http://localhost:3000/guards/destination -H "Content-Type: application/x-www-form-urlencoded" -d "vehicle=bike"
+```
 
 Output: Have a good trip with your bike
 
-​```bash
+```bash
 curl -X POST http://localhost:3000/guards/destination -H "Content-Type: application/x-www-form-urlencoded" -d "vehicle=plane"
-````
+```
 
 Output: {"statusCode":403,"message":"Forbidden resource","error":"Forbidden"}
 
